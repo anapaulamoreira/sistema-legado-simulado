@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Random;
+
 @RestController
 @RequestMapping("/legacy")
 public class SistemaLegadoController {
@@ -42,5 +44,28 @@ public class SistemaLegadoController {
     public ResponseEntity<DadoResponse> dadosNormais() {
         DadoResponse response = sistemaLegadoService.obterDadoNormal();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/api/data")
+    public ResponseEntity<DadoResponse> dadoUnico() {
+        Random random = new Random();
+        int escolha = random.nextInt(3);
+        try {
+            if (escolha == 0) {
+                // Resposta 200 com latência
+                DadoResponse response = sistemaLegadoService.obterDadoComLatencia();
+                return ResponseEntity.ok(response);
+            } else if (escolha == 1) {
+                // Resposta 200 rápida
+                DadoResponse response = sistemaLegadoService.obterDadoNormal();
+                return ResponseEntity.ok(response);
+            } else {
+                // Resposta de erro 500
+                throw new RuntimeException("Erro simulado no sistema legado");
+            }
+        } catch (InterruptedException | RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new DadoResponse(e.getMessage()));
+        }
     }
 }
